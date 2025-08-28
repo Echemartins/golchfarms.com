@@ -1,54 +1,39 @@
 // app/(components)/ContactForm.tsx
 'use client';
+import { Box, Button, FormControl, FormLabel, Input, Textarea, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, Textarea, useToast, VStack } from '@chakra-ui/react';
 
-export default function ContactForm({ source = 'website/contact' }: { source?: string }) {
-  const [loading, setLoading] = useState(false);
-  const toast = useToast();
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const payload = Object.fromEntries(form.entries());
-    setLoading(true);
-    try {
-      const res = await fetch('/api/inquiries', { method: 'POST', body: JSON.stringify({ ...payload, source }), headers: { 'Content-Type': 'application/json' } });
-      if (!res.ok) throw new Error('Failed');
-      toast({ title: 'Message sent', status: 'success' });
-      (e.target as HTMLFormElement).reset();
-    } catch (err) {
-      toast({ title: 'Something went wrong', status: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  }
+export default function ContactForm() {
+const toast = useToast();
+const [loading, setLoading] = useState(false);
 
-  return (
-    <Box as="form" onSubmit={onSubmit} maxW="xl">
-      <VStack spacing={4} align="stretch">
-        <FormControl isRequired>
-          <FormLabel>Name</FormLabel>
-          <Input name="name" placeholder="Your name" />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Email</FormLabel>
-          <Input type="email" name="email" placeholder="you@example.com" />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Phone</FormLabel>
-          <Input name="phone" placeholder="0803…" />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Subject</FormLabel>
-          <Input name="subject" placeholder="Wholesale order / Quote / Support" />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel>Message</FormLabel>
-          <Textarea name="message" rows={5} placeholder="Tell us what you need…" />
-        </FormControl>
-        <Button type="submit" colorScheme="brand" isLoading={loading}>Send</Button>
-      </VStack>
-    </Box>
-  );
+
+async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+e.preventDefault();
+const form = new FormData(e.currentTarget);
+setLoading(true);
+try {
+const res = await fetch('/api/inquiries', { method: 'POST', body: form });
+if (!res.ok) throw new Error('Failed to send');
+toast({ title: 'Sent!', status: 'success' });
+e.currentTarget.reset();
+} catch (error) {
+console.error(error);
+toast({ title: 'Something went wrong', status: 'error' });
+} finally {
+setLoading(false);
+}
+}
+
+
+return (
+<Box as="form" onSubmit={onSubmit} maxW="lg">
+<FormControl isRequired><FormLabel>Name</FormLabel><Input name="name" /></FormControl>
+<FormControl isRequired mt={3}><FormLabel>Email</FormLabel><Input name="email" type="email" /></FormControl>
+<FormControl mt={3}><FormLabel>Phone</FormLabel><Input name="phone" /></FormControl>
+<FormControl isRequired mt={3}><FormLabel>Message</FormLabel><Textarea name="message" rows={5} /></FormControl>
+<Button mt={4} type="submit" isLoading={loading} colorScheme="brand">Send</Button>
+</Box>
+);
 }
